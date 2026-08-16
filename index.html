@@ -198,66 +198,6 @@
   }
   .statement p + p{ margin-top:1.4rem; }
 
-  /* ---------- SIGNS / CONSTELLATION ---------- */
-  .constellation-wrap{
-    position:relative;
-    max-width:1080px;
-    margin:0 auto;
-  }
-  svg.lines{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:0;
-    pointer-events:none;
-    overflow:visible;
-  }
-  svg.lines path{
-    fill:none;
-    stroke:var(--line);
-    stroke-width:1;
-    stroke-dasharray:6 6;
-  }
-  .signs-grid{
-    position:relative;
-    z-index:1;
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:1px;
-    background:var(--line);
-    border:1px solid var(--line);
-  }
-  @media(max-width:820px){ .signs-grid{ grid-template-columns:repeat(2, 1fr); } }
-  @media(max-width:560px){ .signs-grid{ grid-template-columns:1fr; } }
-
-  .sign{
-    background:var(--void);
-    padding:2.4rem 1.8rem;
-    opacity:0;
-    transform:translateY(18px);
-    transition:opacity 0.7s ease, transform 0.7s ease;
-  }
-  .sign.in{ opacity:1; transform:translateY(0); }
-  .sign .mag{
-    font-family:'IBM Plex Mono', monospace;
-    font-size:0.66rem;
-    letter-spacing:0.16em;
-    color:var(--signal-dim);
-  }
-  .sign h3{
-    font-size:1.1rem;
-    font-weight:500;
-    margin-top:0.7rem;
-    color:var(--starlight);
-  }
-  .sign p{
-    margin-top:0.6rem;
-    color:var(--dim);
-    font-size:0.88rem;
-    line-height:1.6;
-  }
-
   /* ---------- WHAT IS ---------- */
   .split{
     max-width:1080px;
@@ -288,47 +228,211 @@
     max-width:16ch;
     margin:0 auto;
   }
-  .signal-form{
-    margin:2.6rem auto 0;
+  /* ---------- REGISTER FORM ---------- */
+  .step-track{
     max-width:420px;
+    margin:0 auto 2rem;
     display:flex;
-    gap:0.6rem;
+    justify-content:center;
+    gap:0.5rem;
   }
-  .signal-form input{
-    flex:1;
-    background:transparent;
+  .step-dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--line);
+    transition:background 0.4s ease, transform 0.4s ease;
+  }
+  .step-dot.active{ background:var(--signal); transform:scale(1.4); }
+
+  .reg-form{
+    max-width:460px;
+    margin:2.6rem auto 0;
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+    gap:1.3rem;
+  }
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--dim);
+    margin-bottom:0.55rem;
+  }
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+  }
+  @media(max-width:520px){ .field-row{ grid-template-columns:1fr; } }
+  .reg-form input{
+    width:100%;
+    background:var(--deep);
     border:1px solid var(--line);
-    border-radius:999px;
-    padding:0.85rem 1.3rem;
+    border-radius:10px;
+    padding:0.85rem 1rem;
     color:var(--starlight);
     font-family:'Work Sans', sans-serif;
-    font-size:0.9rem;
+    font-size:0.92rem;
     outline:none;
     transition:border-color 0.3s ease;
   }
-  .signal-form input::placeholder{ color:var(--dim); }
-  .signal-form input:focus{ border-color:var(--signal); }
-  .signal-form button{
+  .reg-form input::placeholder{ color:#565c72; }
+  .reg-form input:focus{ border-color:var(--signal); }
+  .reg-form input[type="date"],
+  .reg-form input[type="time"]{ color-scheme:dark; }
+  .field-hint{
+    margin-top:0.4rem;
+    font-size:0.76rem;
+    color:#565c72;
+    line-height:1.5;
+  }
+  .reg-submit{
+    margin-top:0.6rem;
     background:var(--signal);
     color:var(--void);
     border:none;
     border-radius:999px;
-    padding:0 1.6rem;
+    padding:1rem 1.6rem;
     font-family:'IBM Plex Mono', monospace;
-    font-size:0.72rem;
+    font-size:0.78rem;
     letter-spacing:0.14em;
     text-transform:uppercase;
     cursor:pointer;
-    transition:opacity 0.3s ease;
+    transition:opacity 0.3s ease, transform 0.2s ease;
   }
-  .signal-form button:hover{ opacity:0.85; }
-  .form-note{
-    margin-top:1rem;
+  .reg-submit:hover{ opacity:0.88; }
+  .reg-submit:active{ transform:scale(0.98); }
+  .privacy-note{
+    margin-top:1.2rem;
     font-size:0.75rem;
     color:var(--dim);
     font-family:'IBM Plex Mono', monospace;
-    letter-spacing:0.04em;
+    letter-spacing:0.03em;
+    text-align:center;
   }
+
+  /* ---------- QUIZ ---------- */
+  .quiz-shell{
+    max-width:640px;
+    margin:0 auto;
+  }
+  .quiz-progress{
+    height:2px;
+    background:var(--line);
+    border-radius:2px;
+    overflow:hidden;
+    margin-bottom:0.9rem;
+  }
+  .quiz-progress-bar{
+    height:100%;
+    width:0%;
+    background:var(--signal);
+    transition:width 0.5s ease;
+  }
+  .quiz-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.68rem;
+    letter-spacing:0.12em;
+    color:var(--dim);
+    text-align:center;
+    margin-bottom:3rem;
+  }
+  .quiz-question{
+    text-align:center;
+  }
+  .quiz-question h3{
+    font-size:clamp(1.4rem, 3.4vw, 1.9rem);
+    font-weight:500;
+    max-width:22ch;
+    margin:0 auto;
+  }
+  .quiz-options{
+    margin-top:2.6rem;
+    display:flex;
+    flex-direction:column;
+    gap:0.7rem;
+  }
+  .quiz-option{
+    text-align:left;
+    background:var(--deep);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:1rem 1.3rem;
+    color:var(--starlight);
+    font-family:'Work Sans', sans-serif;
+    font-size:0.94rem;
+    font-weight:300;
+    cursor:pointer;
+    transition:border-color 0.25s ease, background 0.25s ease, transform 0.15s ease;
+  }
+  .quiz-option:hover{ border-color:var(--signal); background:var(--panel); }
+  .quiz-option:active{ transform:scale(0.99); }
+  .quiz-option.picked{ border-color:var(--signal); background:var(--panel); }
+
+  /* ---------- RESULT ---------- */
+  .result-card{
+    max-width:560px;
+    margin:2.4rem auto 0;
+    border:1px solid var(--race-color, var(--signal));
+    border-radius:20px;
+    padding:3rem 2.2rem;
+    background:linear-gradient(180deg, var(--panel), var(--deep));
+  }
+  .result-symbol{
+    font-size:2.6rem;
+    margin-bottom:1rem;
+  }
+  .result-card .eyebrow{ color:var(--race-color, var(--signal)); }
+  .result-card h2{
+    font-size:clamp(2rem, 5vw, 2.8rem);
+    color:var(--race-color, var(--signal));
+    margin-top:0.6rem;
+  }
+  .result-freq{
+    margin-top:0.6rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.12em;
+    color:var(--dim);
+  }
+  .result-card p.blurb{
+    margin-top:1.6rem;
+    color:#cfcbc0;
+    line-height:1.75;
+    font-size:1rem;
+  }
+  .result-cta{
+    display:inline-flex;
+    align-items:center;
+    gap:0.7rem;
+    margin-top:2.2rem;
+    padding:0.95rem 2rem;
+    background:var(--race-color, var(--signal));
+    color:var(--void);
+    border-radius:999px;
+    text-decoration:none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.76rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+  }
+  .retake{
+    display:block;
+    margin-top:1.6rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    color:var(--dim);
+    background:none;
+    border:none;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  [hidden]{ display:none !important; }
 
   /* ---------- FOOTER ---------- */
   footer{
@@ -361,7 +465,7 @@
   <div class="eyebrow">Signal Check — 4 Minutes</div>
   <h1>Are you<br><em>a starseed?</em></h1>
   <p class="lede">Some people don't feel entirely of this world. Not lost — just tuned to a different frequency. This is a short check to see if you're one of them.</p>
-  <a href="#signal" class="cta">Begin the check <span class="arrow">→</span></a>
+  <a href="#register" class="cta">Begin the check <span class="arrow">→</span></a>
   <div class="scroll-cue">SCROLL</div>
 </header>
 
@@ -372,26 +476,7 @@
   </div>
 </section>
 
-<section id="signs">
-  <div class="section-head">
-    <div class="eyebrow">Field Notes</div>
-    <h2>Seven signs people report</h2>
-    <p>Not a checklist. A constellation — most starseeds recognize themselves in several, not all.</p>
-  </div>
 
-  <div class="constellation-wrap">
-    <svg class="lines" id="linesSvg"></svg>
-    <div class="signs-grid" id="signsGrid">
-      <div class="sign"><div class="mag">01 · REM</div><h3>Vivid, recurring dreams</h3><p>Places you've never been, revisited in sleep with total geographic consistency.</p></div>
-      <div class="sign"><div class="mag">02 · EMP</div><h3>Absorbing others' emotions</h3><p>Walking into a room and knowing its mood before a word is spoken.</p></div>
-      <div class="sign"><div class="mag">03 · MIS</div><h3>Lifelong sense of misplacement</h3><p>Not unhappiness — a quieter feeling of having taken a wrong turn somewhere back in childhood.</p></div>
-      <div class="sign"><div class="mag">04 · SKY</div><h3>Pull toward the night sky</h3><p>An ache when you look up, older than any memory you can name.</p></div>
-      <div class="sign"><div class="mag">05 · SEQ</div><h3>Repeating numbers</h3><p>11:11, 333, 444 — showing up often enough that you've stopped calling it coincidence.</p></div>
-      <div class="sign"><div class="mag">06 · SYS</div><h3>Discomfort with hierarchy</h3><p>An instinctive resistance to systems that ask you to shrink to fit them.</p></div>
-      <div class="sign"><div class="mag">07 · PUR</div><h3>An unspecified sense of purpose</h3><p>The feeling that you're here to do something, even without a name for it yet.</p></div>
-    </div>
-  </div>
-</section>
 
 <section id="what-is">
   <div class="split">
@@ -407,14 +492,76 @@
   </div>
 </section>
 
-<section class="band" id="signal">
-  <div class="eyebrow">Next Transmission</div>
-  <h2>Get the full signal check, free.</h2>
-  <form class="signal-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Sent'; this.querySelector('input').value='';">
-    <input type="email" placeholder="your@email.com" required>
-    <button type="submit">Notify me</button>
+<!-- STEP 1 — REGISTRATION -->
+<section class="band" id="register">
+  <div class="step-track">
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="eyebrow">Step 1 — Coordinates</div>
+  <h2>First, a few coordinates.</h2>
+  <form class="reg-form" id="regForm">
+    <div class="field-row">
+      <div class="field">
+        <label for="birthDate">Birth date</label>
+        <input type="date" id="birthDate" required>
+      </div>
+      <div class="field">
+        <label for="birthTime">Birth time</label>
+        <input type="time" id="birthTime">
+      </div>
+    </div>
+    <div class="field">
+      <label for="birthLocation">Birth location</label>
+      <input type="text" id="birthLocation" placeholder="City, Country" required>
+    </div>
+    <div class="field">
+      <label for="regEmail">Email</label>
+      <input type="email" id="regEmail" placeholder="your@email.com" required>
+      <div class="field-hint">Your result and one follow-up transmission will be sent here. No spam.</div>
+    </div>
+    <button type="submit" class="reg-submit">Continue to the check →</button>
   </form>
-  <div class="form-note">NO SPAM · ONE EMAIL WHEN THE APP OPENS</div>
+  <div class="privacy-note">YOUR DATA IS USED ONLY TO GENERATE YOUR RESULT</div>
+</section>
+
+<!-- STEP 2 — QUIZ -->
+<section class="band" id="quiz" hidden>
+  <div class="step-track">
+    <div class="step-dot active"></div>
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="eyebrow">Step 2 — The Check</div>
+  <div class="quiz-shell">
+    <div class="quiz-progress"><div class="quiz-progress-bar" id="quizProgressBar"></div></div>
+    <div class="quiz-count" id="quizCount">Question 1 of 8</div>
+    <div class="quiz-question" id="quizQuestion">
+      <h3 id="quizQuestionText"></h3>
+      <div class="quiz-options" id="quizOptions"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STEP 3 — RESULT -->
+<section class="band" id="result" hidden>
+  <div class="step-track">
+    <div class="step-dot active"></div>
+    <div class="step-dot active"></div>
+    <div class="step-dot active"></div>
+  </div>
+  <div class="eyebrow">Transmission Received</div>
+  <h2>Your signal has been read.</h2>
+  <div class="result-card" id="resultCard">
+    <div class="result-symbol" id="resultSymbol"></div>
+    <div class="eyebrow" id="resultEyebrow"></div>
+    <h2 id="resultTitle"></h2>
+    <div class="result-freq" id="resultFreq"></div>
+    <p class="blurb" id="resultBlurb"></p>
+    <a href="https://www.facebook.com/starseedtransmission/subscribe/" target="_blank" class="result-cta" id="resultCta">Join the transmission →</a>
+  </div>
+  <button class="retake" id="retakeBtn">Retake the check</button>
 </section>
 
 <footer>
@@ -460,43 +607,238 @@
   resize();
   requestAnimationFrame(draw);
 
-  // ---------- Sign cards reveal + constellation lines ----------
-  const signEls = Array.from(document.querySelectorAll('.sign'));
-  const svg = document.getElementById('linesSvg');
-  const wrap = document.getElementById('signsGrid');
+  // ============================================================
+  // REGISTRATION → QUIZ → RESULT FLOW
+  // ============================================================
 
-  function connectLines(){
-    svg.innerHTML = '';
-    const wrapRect = wrap.getBoundingClientRect();
-    const revealed = signEls.filter(el => el.classList.contains('in'));
-    for(let i = 0; i < revealed.length - 1; i++){
-      const a = revealed[i].getBoundingClientRect();
-      const b = revealed[i+1].getBoundingClientRect();
-      const ax = a.left + a.width/2 - wrapRect.left;
-      const ay = a.top + a.height/2 - wrapRect.top;
-      const bx = b.left + b.width/2 - wrapRect.left;
-      const by = b.top + b.height/2 - wrapRect.top;
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', `M${ax},${ay} L${bx},${by}`);
-      svg.appendChild(path);
+  // ---------- Race data (brand-locked, do not rename) ----------
+  const RACES = {
+    andromedan: {
+      name: 'Andromedan', symbol: '🌀', freq: '852 Hz',
+      color: '#5ad1e6',
+      blurb: "You read as Andromedan. Freedom isn't a mood for you, it's a requirement — you feel every wall before anyone points it out, and you've never been able to unsee a system built to keep people small. Your signal is the Sovereign Override: the instinct to open the field and let people choose their own way through it."
+    },
+    arcturian: {
+      name: 'Arcturian', symbol: '🔷', freq: '432 Hz',
+      color: '#6f8fe0',
+      blurb: "You read as Arcturian. You've always sensed there's a blueprint underneath things — a code running quietly beneath the noise, waiting to be remembered rather than learned. People come to you for the missing piece. Your DNA runs on ancient code, and you're built to decode it for others."
+    },
+    lyran: {
+      name: 'Lyran', symbol: '🔥', freq: '126 Hz',
+      color: '#e3a13c',
+      blurb: "You read as Lyran. Underneath the calm, there's an old warrior's blood in you — the kind that doesn't perform courage, it just moves first. You say the hard thing everyone else is avoiding. Your Mane Ignition runs hot: you were built to protect, not to shrink."
+    },
+    pleiadian: {
+      name: 'Pleiadian', symbol: '🌸', freq: '528 Hz',
+      color: '#e3b23c',
+      blurb: "You read as Pleiadian. You feel a room before you understand it, and you notice who's struggling before they say a word. Softness is not your weakness, it's your instrument. Your frequency is heart-first — compassion as a skill, not just a feeling."
+    },
+    sirian: {
+      name: 'Sirian', symbol: '🌊', freq: '639 Hz',
+      color: '#3ec6c6',
+      blurb: "You read as Sirian. You've always moved at a different pace than the room — slower, deeper, closer to the current underneath the conversation. Water finds you in dreams for a reason. Your gift is depth: you hear the frequency other people are too rushed to notice."
+    },
+    lemurian: {
+      name: 'Lemurian', symbol: '🌾', freq: '396 Hz',
+      color: '#c9a15a',
+      blurb: "You read as Lemurian. No cosmic pull for you — your signal comes from the ground. You're the one people land on: steady, warm, quietly holding things together with ancestral patience. Your wisdom isn't new, it's remembered, passed down through roots rather than stars."
     }
+  };
+
+  // ---------- Questions: each option is tagged with a race ----------
+  const QUESTIONS = [
+    {
+      q: "When you look up at a clear night sky, what do you feel first?",
+      options: [
+        ["A pull toward one particular point, like it's calling you", "andromedan"],
+        ["A dense, layered blueprint you could read if you focused hard enough", "arcturian"],
+        ["Warmth, like standing near a fire that's always been lit", "lyran"],
+        ["A soft ache in your chest, like missing someone gently", "pleiadian"],
+        ["A low hum, like a tide moving somewhere far away", "sirian"],
+        ["Nothing cosmic — your eyes drop to the trees, the ground", "lemurian"]
+      ]
+    },
+    {
+      q: "In a group project, you're usually the one who...",
+      options: [
+        ["Questions why the group needs a hierarchy at all", "andromedan"],
+        ["Sees the pattern nobody else has mapped yet", "arcturian"],
+        ["Says the hard thing everyone was avoiding", "lyran"],
+        ["Notices who's quietly struggling and checks on them", "pleiadian"],
+        ["Waits, listens, then says the one sentence that reframes everything", "sirian"],
+        ["Keeps everyone fed, grounded, and on schedule", "lemurian"]
+      ]
+    },
+    {
+      q: "Your ideal escape isn't a vacation. It's...",
+      options: [
+        ["Total autonomy — no schedule, no one to report to", "andromedan"],
+        ["A locked room with data or patterns to lose yourself in", "arcturian"],
+        ["A physical challenge that leaves you clear-headed", "lyran"],
+        ["A long conversation with someone who really sees you", "pleiadian"],
+        ["Water — any water, any depth", "sirian"],
+        ["Dirt under your nails, growing something slowly", "lemurian"]
+      ]
+    },
+    {
+      q: "The rule you break most instinctively is...",
+      options: [
+        ["Any rule that exists just to control people", "andromedan"],
+        ["Following instructions instead of rebuilding the system yourself", "arcturian"],
+        ["Staying quiet when you clearly disagree", "lyran"],
+        ["Keeping your guard up around people in pain", "pleiadian"],
+        ["Rushing something that needs to be felt slowly", "sirian"],
+        ["Ignoring your body's signals to keep pushing", "lemurian"]
+      ]
+    },
+    {
+      q: "People come to you for...",
+      options: [
+        ["Permission to leave something that isn't working", "andromedan"],
+        ["Answers, clarity, the missing piece", "arcturian"],
+        ["Courage, a push, a reason to try again", "lyran"],
+        ["Comfort, softness, to feel less alone", "pleiadian"],
+        ["Perspective, depth, a different angle", "sirian"],
+        ["Grounding, steadiness, a place to land", "lemurian"]
+      ]
+    },
+    {
+      q: "A recurring dream or memory that doesn't quite fit your life involves...",
+      options: [
+        ["Vast open space, no walls, no ceiling", "andromedan"],
+        ["Symbols or a code you almost understand", "arcturian"],
+        ["Fire, battle, or an old kind of courage", "lyran"],
+        ["A garden, a hearth, someone you loved deeply", "pleiadian"],
+        ["The ocean, or a sound like a heartbeat underwater", "sirian"],
+        ["A temple, stone pillars, golden light", "lemurian"]
+      ]
+    },
+    {
+      q: "What frustrates you most about modern life?",
+      options: [
+        ["How many systems exist just to keep people small", "andromedan"],
+        ["How little people question what they're told", "arcturian"],
+        ["How much comfort has replaced courage", "lyran"],
+        ["How disconnected people are from their own hearts", "pleiadian"],
+        ["How fast everything moves, with no room to feel", "sirian"],
+        ["How far removed we've become from the earth", "lemurian"]
+      ]
+    },
+    {
+      q: "One word for how you move through the world:",
+      options: [
+        ["Free", "andromedan"],
+        ["Aware", "arcturian"],
+        ["Fierce", "lyran"],
+        ["Tender", "pleiadian"],
+        ["Deep", "sirian"],
+        ["Rooted", "lemurian"]
+      ]
+    }
+  ];
+
+  let currentQ = 0;
+  const scores = { andromedan: 0, arcturian: 0, lyran: 0, pleiadian: 0, sirian: 0, lemurian: 0 };
+  let regData = { birthDate: '', birthTime: '', birthLocation: '', email: '' };
+
+  // Google Apps Script Web App URL — receives form + quiz data and appends a row to the sheet.
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx49r4LKzgyojzenbuUzLo54AOP2GvLefrDEFO0rObj1vUN7E97JR0rpyVeoz7m4gJy/exec';
+
+  function sendToSheet(payload){
+    // no-cors: we can't read the response, but the POST still reaches Apps Script and appends the row.
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(() => { /* silent — never block the UI on a network hiccup */ });
   }
 
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry, idx) => {
-      if(entry.isIntersecting){
-        setTimeout(() => {
-          entry.target.classList.add('in');
-          connectLines();
-        }, idx * 90);
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.35 });
+  const regForm = document.getElementById('regForm');
+  const registerSection = document.getElementById('register');
+  const quizSection = document.getElementById('quiz');
+  const resultSection = document.getElementById('result');
 
-  signEls.forEach(el => io.observe(el));
-  window.addEventListener('resize', connectLines);
-  window.addEventListener('scroll', connectLines, { passive: true });
+  regForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    regData = {
+      birthDate: document.getElementById('birthDate').value,
+      birthTime: document.getElementById('birthTime').value,
+      birthLocation: document.getElementById('birthLocation').value,
+      email: document.getElementById('regEmail').value
+    };
+    // Capture the lead right away, even if they never finish the quiz.
+    sendToSheet({ ...regData, result: '', resultBlurb: '' });
+
+    registerSection.hidden = true;
+    quizSection.hidden = false;
+    quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    renderQuestion();
+  });
+
+  const quizQuestionText = document.getElementById('quizQuestionText');
+  const quizOptions = document.getElementById('quizOptions');
+  const quizCount = document.getElementById('quizCount');
+  const quizProgressBar = document.getElementById('quizProgressBar');
+
+  function renderQuestion(){
+    const item = QUESTIONS[currentQ];
+    quizCount.textContent = `Question ${currentQ + 1} of ${QUESTIONS.length}`;
+    quizProgressBar.style.width = `${(currentQ / QUESTIONS.length) * 100}%`;
+    quizQuestionText.textContent = item.q;
+    quizOptions.innerHTML = '';
+    item.options.forEach(([label, race]) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'quiz-option';
+      btn.textContent = label;
+      btn.addEventListener('click', () => selectAnswer(race, btn));
+      quizOptions.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(race, btnEl){
+    scores[race] += 1;
+    btnEl.classList.add('picked');
+    Array.from(quizOptions.children).forEach(b => b.disabled = true);
+    setTimeout(() => {
+      currentQ += 1;
+      if(currentQ < QUESTIONS.length){
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }, 320);
+  }
+
+  function showResult(){
+    quizProgressBar.style.width = '100%';
+    const topRace = Object.keys(scores).reduce((a, b) => scores[b] > scores[a] ? b : a);
+    const data = RACES[topRace];
+
+    document.getElementById('resultSymbol').textContent = data.symbol;
+    document.getElementById('resultEyebrow').textContent = 'Your Signal';
+    document.getElementById('resultTitle').textContent = data.name;
+    document.getElementById('resultFreq').textContent = `RESONANT FREQUENCY — ${data.freq}`;
+    document.getElementById('resultBlurb').textContent = data.blurb;
+    document.getElementById('resultCard').style.setProperty('--race-color', data.color);
+
+    // Log the completed result as its own row (registration row was already sent).
+    sendToSheet({ ...regData, result: data.name, resultBlurb: data.blurb });
+
+    quizSection.hidden = true;
+    resultSection.hidden = false;
+    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.getElementById('retakeBtn').addEventListener('click', () => {
+    currentQ = 0;
+    Object.keys(scores).forEach(k => scores[k] = 0);
+    resultSection.hidden = true;
+    registerSection.hidden = false;
+    regForm.reset();
+    registerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 </script>
 
 </body>
