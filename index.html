@@ -740,9 +740,10 @@
   let currentQ = 0;
   const scores = { andromedan: 0, arcturian: 0, lyran: 0, pleiadian: 0, sirian: 0, lemurian: 0 };
   let regData = { birthDate: '', birthTime: '', birthLocation: '', email: '' };
+  const sessionId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 
   // Google Apps Script Web App URL — receives form + quiz data and appends a row to the sheet.
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx49r4LKzgyojzenbuUzLo54AOP2GvLefrDEFO0rObj1vUN7E97JR0rpyVeoz7m4gJy/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxDmybkk1ZLLblE5eAOV2v9JwzMIAMX1UyGen8Utm1ylUSABIOUcavNYD23dpDVkBg5/exec';
 
   function sendToSheet(payload){
     // no-cors: we can't read the response, but the POST still reaches Apps Script and appends the row.
@@ -768,7 +769,7 @@
       email: document.getElementById('regEmail').value
     };
     // Capture the lead right away, even if they never finish the quiz.
-    sendToSheet({ ...regData, result: '', resultBlurb: '' });
+    sendToSheet({ ...regData, result: '', resultBlurb: '', sessionId });
 
     registerSection.hidden = true;
     quizSection.hidden = false;
@@ -823,8 +824,8 @@
     document.getElementById('resultBlurb').textContent = data.blurb;
     document.getElementById('resultCard').style.setProperty('--race-color', data.color);
 
-    // Log the completed result as its own row (registration row was already sent).
-    sendToSheet({ ...regData, result: data.name, resultBlurb: data.blurb });
+    // This updates the same row created at registration (matched by sessionId).
+    sendToSheet({ ...regData, result: data.name, resultBlurb: data.blurb, sessionId });
 
     quizSection.hidden = true;
     resultSection.hidden = false;
