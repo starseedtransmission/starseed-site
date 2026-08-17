@@ -441,6 +441,58 @@
     cursor:pointer;
   }
 
+  /* ---------- GUMROAD OPT-IN ---------- */
+  .gumroad-block{
+    max-width:460px;
+    margin:2.2rem auto 0;
+    padding-top:2rem;
+    border-top:1px solid var(--line);
+  }
+  .gumroad-block .eyebrow{ margin-bottom:0.7rem; }
+  .gumroad-block p{
+    color:var(--dim);
+    font-size:0.86rem;
+    line-height:1.6;
+    margin-bottom:1.2rem;
+  }
+  #gumroad-follow-form-embed{
+    display:flex;
+    gap:0.6rem;
+  }
+  #gumroad-follow-form-embed-input{
+    flex:1 1 0%;
+    background:var(--deep);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:0.85rem 1rem;
+    color:var(--starlight);
+    font-family:'Work Sans', sans-serif;
+    font-size:0.9rem;
+    outline:none;
+  }
+  #gumroad-follow-form-embed-input::placeholder{ color:#565c72; }
+  #gumroad-follow-form-embed-button{
+    background:var(--signal);
+    color:var(--void);
+    border:none;
+    border-radius:10px;
+    padding:0 1.4rem;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.74rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .gumroad-status{
+    margin-top:0.8rem;
+    font-size:0.76rem;
+    color:var(--signal);
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.03em;
+    display:none;
+  }
+  .gumroad-status.show{ display:block; }
+
   [hidden]{ display:none !important; }
 
   /* ---------- FOOTER ---------- */
@@ -570,7 +622,19 @@
     <div class="result-freq" id="resultFreq"></div>
     <p class="blurb" id="resultBlurb"></p>
     <a href="https://www.facebook.com/starseedtransmission/subscribe/" target="_blank" class="result-cta" id="resultCta">Join the transmission →</a>
+
+    <div class="gumroad-block">
+      <div class="eyebrow">One More Thing</div>
+      <p>Want product drops and early access too? Join the Starseed Transmission circle on Gumroad — same email, one click.</p>
+      <form class="flex gap-2" action="https://gumroad.com/follow_from_embed_form" method="post" id="gumroad-follow-form-embed" target="gumroadFrame">
+        <input type="hidden" name="seller_id" value="2588352035934"/>
+        <input class="font-[inherit] py-3 px-4 text-base leading-snug text-foreground border border-border rounded block w-full bg-background placeholder:text-muted focus:outline-2 focus:outline-indicator focus:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-30 flex-1" id="gumroad-follow-form-embed-input" type="email" placeholder="Your email address" name="email" value=""/>
+        <button class="inline-flex items-center justify-center gap-2 cursor-pointer border border-border rounded font-[inherit] no-underline transition-transform hover:-translate-1 hover:shadow-[0.25rem_0.25rem_0_var(--color-black)] active:translate-0 active:shadow-none data-[state=open]:translate-0! data-[state=open]:shadow-none! px-4 py-3 text-base leading-snug bg-primary text-primary-foreground hover:bg-accent-with-text hover:text-accent-foreground" type="submit" id="gumroad-follow-form-embed-button">Follow</button>
+      </form>
+      <div class="gumroad-status" id="gumroadStatus">Added — check your inbox to confirm.</div>
+    </div>
   </div>
+  <iframe name="gumroadFrame" style="display:none;" title="gumroad-follow"></iframe>
   <button class="retake" id="retakeBtn">Retake the check</button>
 </section>
 
@@ -872,6 +936,17 @@
 
     // This updates the same row created at registration (matched by sessionId).
     sendToSheet({ ...regData, result: data.name, sessionId });
+
+    // Prefill and wire the Gumroad follow form with the same email — submits silently via hidden iframe.
+    const gumroadInput = document.getElementById('gumroad-follow-form-embed-input');
+    const gumroadForm = document.getElementById('gumroad-follow-form-embed');
+    const gumroadStatus = document.getElementById('gumroadStatus');
+    if(gumroadInput) gumroadInput.value = regData.email || '';
+    if(gumroadForm){
+      gumroadForm.addEventListener('submit', () => {
+        gumroadStatus.classList.add('show');
+      });
+    }
 
     quizSection.hidden = true;
     resultSection.hidden = false;
