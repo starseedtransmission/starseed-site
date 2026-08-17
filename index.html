@@ -793,19 +793,6 @@
     return true;
   }
 
-  function calculateAge(birthDateStr){
-    if(!birthDateStr) return '';
-    const birth = new Date(birthDateStr);
-    if(isNaN(birth.getTime())) return '';
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())){
-      age -= 1;
-    }
-    return age >= 0 ? age : '';
-  }
-
   emailInput.addEventListener('input', () => {
     emailInput.classList.remove('invalid');
     emailError.classList.remove('show');
@@ -825,8 +812,7 @@
       birthDate: document.getElementById('birthDate').value,
       birthTime: document.getElementById('birthTime').value,
       birthLocation: document.getElementById('birthLocation').value,
-      email: emailInput.value.trim(),
-      age: calculateAge(document.getElementById('birthDate').value)
+      email: emailInput.value.trim()
     };
     // Capture the lead right away, even if they never finish the quiz.
     sendToSheet({ ...regData, result: '', sessionId });
