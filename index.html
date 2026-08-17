@@ -773,7 +773,7 @@
   const emailError = document.getElementById('emailError');
 
   // Strict-ish email format: requires a real-looking domain and TLD.
-  const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+\.[a-zA-Z]{2,}$/;
+  const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
 
   // Known disposable / throwaway email domains — expand this list as new ones show up.
   const DISPOSABLE_DOMAINS = new Set([
