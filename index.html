@@ -289,6 +289,15 @@
     color:#565c72;
     line-height:1.5;
   }
+  .field-error{
+    margin-top:0.4rem;
+    font-size:0.78rem;
+    color:#e0715c;
+    line-height:1.5;
+    display:none;
+  }
+  .field-error.show{ display:block; }
+  .reg-form input.invalid{ border-color:#e0715c; }
   .reg-submit{
     margin-top:0.6rem;
     background:var(--signal);
@@ -520,6 +529,7 @@
       <label for="regEmail">Email</label>
       <input type="email" id="regEmail" placeholder="your@email.com" required>
       <div class="field-hint">Your result and one follow-up transmission will be sent here. No spam.</div>
+      <div class="field-error" id="emailError">Please enter a real, working email address.</div>
     </div>
     <button type="submit" class="reg-submit">Continue to the check →</button>
   </form>
@@ -759,17 +769,67 @@
   const registerSection = document.getElementById('register');
   const quizSection = document.getElementById('quiz');
   const resultSection = document.getElementById('result');
+  const emailInput = document.getElementById('regEmail');
+  const emailError = document.getElementById('emailError');
+
+  // Strict-ish email format: requires a real-looking domain and TLD.
+  const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+\.[a-zA-Z]{2,}$/;
+
+  // Known disposable / throwaway email domains — expand this list as new ones show up.
+  const DISPOSABLE_DOMAINS = new Set([
+    'mailinator.com','tempmail.com','temp-mail.org','guerrillamail.com','guerrillamail.info',
+    '10minutemail.com','10minutemail.net','yopmail.com','yopmail.fr','trashmail.com',
+    'throwawaymail.com','maildrop.cc','fakeinbox.com','getnada.com','mohmal.com',
+    'sharklasers.com','dispostable.com','mintemail.com','mailnesia.com','moakt.com',
+    'emailondeck.com','tempinbox.com','spamgourmet.com','trbvm.com','tempr.email',
+    'discard.email','mytemp.email','burnermail.io','anonaddy.com','luxusmail.org'
+  ]);
+
+  function isValidEmail(value){
+    const trimmed = value.trim();
+    if(!EMAIL_REGEX.test(trimmed)) return false;
+    const domain = trimmed.split('@')[1].toLowerCase();
+    if(DISPOSABLE_DOMAINS.has(domain)) return false;
+    return true;
+  }
+
+  function calculateAge(birthDateStr){
+    if(!birthDateStr) return '';
+    const birth = new Date(birthDateStr);
+    if(isNaN(birth.getTime())) return '';
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())){
+      age -= 1;
+    }
+    return age >= 0 ? age : '';
+  }
+
+  emailInput.addEventListener('input', () => {
+    emailInput.classList.remove('invalid');
+    emailError.classList.remove('show');
+  });
 
   regForm.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    if(!isValidEmail(emailInput.value)){
+      emailInput.classList.add('invalid');
+      emailError.classList.add('show');
+      emailInput.focus();
+      return;
+    }
+
     regData = {
       birthDate: document.getElementById('birthDate').value,
       birthTime: document.getElementById('birthTime').value,
       birthLocation: document.getElementById('birthLocation').value,
-      email: document.getElementById('regEmail').value
+      email: emailInput.value.trim(),
+      age: calculateAge(document.getElementById('birthDate').value)
     };
     // Capture the lead right away, even if they never finish the quiz.
-    sendToSheet({ ...regData, result: '', resultBlurb: '', sessionId });
+    sendToSheet({ ...regData, result: '', sessionId });
 
     registerSection.hidden = true;
     quizSection.hidden = false;
@@ -825,7 +885,7 @@
     document.getElementById('resultCard').style.setProperty('--race-color', data.color);
 
     // This updates the same row created at registration (matched by sessionId).
-    sendToSheet({ ...regData, result: data.name, resultBlurb: data.blurb, sessionId });
+    sendToSheet({ ...regData, result: data.name, sessionId });
 
     quizSection.hidden = true;
     resultSection.hidden = false;
