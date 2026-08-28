@@ -8,8 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Work+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js" defer></script>
 <style>
   :root{
     --void:#080b14;
@@ -460,45 +458,143 @@
 
   [hidden]{ display:none !important; }
 
-  /* ---------- WORLD MAP ---------- */
+  /* ---------- WORLD MAP (Leaflet) ---------- */
+  #worldmap{
+    padding-top:5.5rem;
+    padding-bottom:2.5rem;
+  }
   .map-wrap{
-    max-width:1100px;
-    margin:0 auto;
+    width:100vw;
     position:relative;
-    border:1px solid var(--line);
-    border-radius:16px;
-    background:var(--deep);
+    left:50%;
+    transform:translateX(-50%);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    background:#04050a;
     overflow:hidden;
-    padding:1rem;
+    padding:1rem clamp(1rem, 4vw, 3rem);
   }
-  #worldMapSvg{
-    display:block;
+  #leafletMap{
     width:100%;
-    height:auto;
+    height:clamp(280px, 52vh, 480px);
+    background:#04050a;
   }
-  #worldMapSvg .country{
-    fill:var(--panel);
-    stroke:var(--line);
-    stroke-width:0.5;
+  /* Restyle Leaflet's default light-UI controls/attribution to fit the dark theme */
+  .leaflet-container{
+    background:#04050a;
+    font-family:'Work Sans', sans-serif;
   }
-  .map-route{
-    fill:none;
-    stroke:#5ad1e6;
-    stroke-width:1;
-    opacity:0.45;
+  /* Darken the free standard OSM tiles into a space-themed dark map (no paid/keyed tile service needed) */
+  .leaflet-tile-pane{
+    filter:invert(1) hue-rotate(180deg) brightness(0.85) saturate(0.25) contrast(1.05);
   }
-  .map-pin-dot{
-    fill:#5ad1e6;
-    stroke:#0f1526;
-    stroke-width:1.2;
+  .leaflet-control-zoom a{
+    background:var(--panel) !important;
+    color:var(--starlight) !important;
+    border-color:var(--line) !important;
   }
-  .map-pin-count{
-    fill:#08111a;
+  .leaflet-control-zoom a:hover{
+    background:var(--deep) !important;
+  }
+  .leaflet-control-attribution{
+    background:rgba(4,5,10,0.75) !important;
+    color:var(--dim) !important;
+    font-size:0.6rem !important;
+  }
+  .leaflet-control-attribution a{ color:var(--dim) !important; }
+  .leaflet-popup-content-wrapper{
+    background:var(--panel) !important;
+    color:var(--starlight) !important;
+    border:1px solid var(--line);
     font-family:'IBM Plex Mono', monospace;
-    font-weight:700;
-    text-anchor:middle;
-    dominant-baseline:central;
+    font-size:0.78rem;
+  }
+  .leaflet-popup-tip{ background:var(--panel) !important; }
+  .map-route{
+    animation:route-pulse 3s ease-in-out infinite;
+  }
+  @keyframes route-pulse{
+    0%, 100%{ opacity:0.35; }
+    50%{ opacity:0.7; }
+  }
+  .map-pin-live{
+    transform-box:fill-box;
+    transform-origin:center;
+    animation:pin-breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes pin-breathe{
+    0%, 100%{ transform:scale(1); }
+    50%{ transform:scale(1.15); }
+  }
+  .hero-cta-wrap{
+    text-align:center;
+    margin-top:2.4rem;
+  }
+  .map-goal-bar{
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    width:clamp(56px, 8vw, 76px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    z-index:1000;
+    background:linear-gradient(180deg, rgba(8,11,20,0.92), rgba(8,11,20,0.75));
+    border-left:1px solid var(--line);
+    padding:1.2rem 0 1rem;
     pointer-events:none;
+  }
+  .goal-caption{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.55rem;
+    letter-spacing:0.14em;
+    color:var(--dim);
+    text-transform:uppercase;
+  }
+  .goal-label-top{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.78rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--starlight);
+    margin-top:0.15rem;
+  }
+  .goal-label-bottom{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:1.05rem;
+    font-weight:700;
+    color:var(--signal);
+    margin-top:0.15rem;
+    text-shadow:0 0 12px rgba(227,178,60,0.5);
+  }
+  .goal-track{
+    flex:1;
+    width:14px;
+    margin:0.9rem 0;
+    background:rgba(139,143,163,0.14);
+    border:1px solid var(--line);
+    border-radius:999px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    box-shadow:inset 0 0 8px rgba(0,0,0,0.5);
+  }
+  .goal-fill{
+    width:100%;
+    height:0%;
+    min-height:3px;
+    background:linear-gradient(180deg, #5ad1e6, var(--signal));
+    border-radius:999px;
+    transition:height 1.4s ease;
+    box-shadow:0 0 14px rgba(90,209,230,0.7), 0 0 6px rgba(227,178,60,0.5);
+    animation:goal-glow 2.4s ease-in-out infinite;
+  }
+  @keyframes goal-glow{
+    0%, 100%{ filter:brightness(1); }
+    50%{ filter:brightness(1.25); }
   }
   .map-status{
     text-align:center;
@@ -534,6 +630,8 @@
     text-align:center;
   }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 </head>
 <body>
 
@@ -544,13 +642,24 @@
   <div class="coords">40.0° N, 32.8° E — RECEIVING</div>
 </nav>
 
-<header class="hero">
-  <div class="eyebrow">Signal Check — 4 Minutes</div>
-  <h1>Are you<br><em>a starseed?</em></h1>
-  <p class="lede">Some people don't feel entirely of this world. Not lost — just tuned to a different frequency. This is a short check to see if you're one of them.</p>
-  <a href="#register" class="cta">Begin the check <span class="arrow">→</span></a>
-  <div class="scroll-cue">SCROLL</div>
-</header>
+<section id="worldmap">
+  <div class="map-wrap">
+    <div id="leafletMap"></div>
+    <div class="map-goal-bar">
+      <div class="goal-caption">Goal</div>
+      <div class="goal-label-top">1000</div>
+      <div class="goal-track">
+        <div class="goal-fill" id="goalFill"></div>
+      </div>
+      <div class="goal-label-bottom" id="goalCurrent">0</div>
+      <div class="goal-caption">Joined</div>
+    </div>
+  </div>
+  <div class="hero-cta-wrap">
+    <a href="#register" class="cta">Begin The Test and Connect To The World <span class="arrow">→</span></a>
+  </div>
+  <div class="map-status" id="mapStatus">Loading signal map…</div>
+</section>
 
 <section id="statement-section">
   <div class="statement">
@@ -573,19 +682,6 @@
       <p>Starseed Transmission doesn't ask you to believe anything. It asks you to notice what you already feel, and gives it a vocabulary.</p>
     </div>
   </div>
-</section>
-
-<section id="worldmap">
-  <div class="section-head">
-    <div class="eyebrow">Live Signal Map</div>
-    <h2>Where starseeds are awakening</h2>
-    <p>Every dot is a city that has answered the check. Routes trace back to our home base in California.</p>
-  </div>
-  <div class="map-wrap">
-    <svg id="worldMapSvg" viewBox="0 0 960 500"></svg>
-  </div>
-  <div class="map-status" id="mapStatus">Loading signal map…</div>
-  <div class="map-credit">Map data © Natural Earth · Geocoding via OpenStreetMap Nominatim</div>
 </section>
 
 <!-- STEP 1 — REGISTRATION -->
@@ -987,92 +1083,88 @@
   });
 
   // ============================================================
-  // WORLD MAP — city registrations plotted with flight routes to California
+  // WORLD MAP — interactive Leaflet map, dark theme, live city registrations
   // ============================================================
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof d3 === 'undefined' || typeof topojson === 'undefined') return;
-
+  window.addEventListener('load', () => {
     const mapStatus = document.getElementById('mapStatus');
-    const svg = d3.select('#worldMapSvg');
-    const WIDTH = 960, HEIGHT = 500;
-    // California reference point (Los Angeles) — every route fans out from here.
-    const BASE = { lat: 34.05, lng: -118.24 };
-
-    const projection = d3.geoNaturalEarth1().scale(155).translate([WIDTH / 2, HEIGHT / 1.7]);
-    const path = d3.geoPath(projection);
-
-    function project(lat, lng){
-      const p = projection([lng, lat]);
-      return p ? { x: p[0], y: p[1] } : null;
+    const mapEl = document.getElementById('leafletMap');
+    if (!mapEl || typeof L === 'undefined') {
+      if (mapStatus) mapStatus.textContent = 'Map failed to load.';
+      return;
     }
 
-    function arcPath(a, b){
-      const mx = (a.x + b.x) / 2;
-      const my = (a.y + b.y) / 2;
-      const dx = b.x - a.x, dy = b.y - a.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const curve = Math.min(dist * 0.25, 80);
-      // Perpendicular offset for a gentle flight-path arc.
-      const nx = -dy / (dist || 1);
-      const ny = dx / (dist || 1);
-      const cx = mx + nx * curve;
-      const cy = my + ny * curve;
-      return `M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`;
-    }
+    const BASE = { lat: 34.05, lng: -118.24 }; // California (Los Angeles) reference point
 
-    Promise.all([
-      d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'),
-      fetch(SHEET_URL).then(r => r.json()).catch(() => [])
-    ]).then(([worldData, cities]) => {
-      const countries = topojson.feature(worldData, worldData.objects.countries);
+    const map = L.map('leafletMap', {
+      worldCopyJump: true,
+      minZoom: 1,
+      maxZoom: 8,
+      zoomControl: true,
+      attributionControl: true
+    }).setView([20, 10], 2);
 
-      svg.append('g')
-        .selectAll('path')
-        .data(countries.features)
-        .join('path')
-        .attr('class', 'country')
-        .attr('d', path);
+    // Standard OpenStreetMap tiles — genuinely free, no API key, no signup.
+    // Darkened client-side via CSS filter (see .leaflet-tile-pane rule) to match the site's theme.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: 'abc',
+      maxZoom: 19
+    }).addTo(map);
 
-      const base = project(BASE.lat, BASE.lng);
-      const validCities = (Array.isArray(cities) ? cities : [])
-        .map(c => ({ ...c, pos: project(c.lat, c.lng) }))
-        .filter(c => c.pos && c.count > 0);
+    const baseMarker = L.circleMarker([BASE.lat, BASE.lng], {
+      radius: 5,
+      color: '#e3b23c',
+      weight: 1.5,
+      fillColor: '#e3b23c',
+      fillOpacity: 0.9,
+      className: 'map-pin-live'
+    }).addTo(map).bindTooltip('Starseed Transmission HQ', { direction: 'top' });
 
-      if(!validCities.length){
+    fetch(SHEET_URL).then(r => r.json()).then(cities => {
+      const validCities = (Array.isArray(cities) ? cities : []).filter(c => c.lat && c.lng && c.count > 0);
+
+      if (!validCities.length) {
         mapStatus.textContent = 'No signals recorded yet — be the first city on the map.';
         return;
       }
 
-      // Flight routes from California to every city.
-      if(base){
-        svg.append('g')
-          .selectAll('path')
-          .data(validCities)
-          .join('path')
-          .attr('class', 'map-route')
-          .attr('d', d => arcPath(base, d.pos));
-      }
+      const bounds = [[BASE.lat, BASE.lng]];
 
-      // Balloon markers sized by registration count.
-      const markers = svg.append('g')
-        .selectAll('g')
-        .data(validCities)
-        .join('g')
-        .attr('transform', d => `translate(${d.pos.x},${d.pos.y})`);
+      validCities.forEach(c => {
+        bounds.push([c.lat, c.lng]);
 
-      markers.append('circle')
-        .attr('class', 'map-pin-dot')
-        .attr('r', d => Math.min(8 + Math.sqrt(d.count) * 4, 22));
+        L.polyline([[BASE.lat, BASE.lng], [c.lat, c.lng]], {
+          color: '#5ad1e6',
+          weight: 1,
+          opacity: 0.5,
+          className: 'map-route'
+        }).addTo(map);
 
-      markers.append('text')
-        .attr('class', 'map-pin-count')
-        .attr('font-size', d => Math.min(9 + Math.sqrt(d.count), 13))
-        .text(d => d.count);
+        const radius = Math.min(5 + Math.sqrt(c.count) * 2.5, 20);
 
-      markers.append('title').text(d => `${d.city}: ${d.count}`);
+        L.circleMarker([c.lat, c.lng], {
+          radius,
+          color: '#0a1120',
+          weight: 1,
+          fillColor: '#5ad1e6',
+          fillOpacity: 0.85,
+          className: 'map-pin-live'
+        })
+          .addTo(map)
+          .bindPopup(`<strong>${c.city}</strong><br>${c.count} signal${c.count === 1 ? '' : 's'}`);
+      });
 
       const totalSignals = validCities.reduce((sum, c) => sum + c.count, 0);
       mapStatus.textContent = `${totalSignals} signal${totalSignals === 1 ? '' : 's'} received from ${validCities.length} cit${validCities.length === 1 ? 'y' : 'ies'}.`;
+
+      const GOAL = 1000;
+      const goalFill = document.getElementById('goalFill');
+      const goalCurrent = document.getElementById('goalCurrent');
+      if (goalFill && goalCurrent) {
+        const pct = Math.min((totalSignals / GOAL) * 100, 100);
+        goalFill.style.height = pct + '%';
+        goalCurrent.textContent = totalSignals;
+      }
     }).catch(() => {
       mapStatus.textContent = 'Signal map is warming up — check back shortly.';
     });
