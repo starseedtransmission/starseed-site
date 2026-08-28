@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Work+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js" defer></script>
 <style>
   :root{
     --void:#080b14;
@@ -458,6 +460,63 @@
 
   [hidden]{ display:none !important; }
 
+  /* ---------- WORLD MAP ---------- */
+  .map-wrap{
+    max-width:1100px;
+    margin:0 auto;
+    position:relative;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:var(--deep);
+    overflow:hidden;
+    padding:1rem;
+  }
+  #worldMapSvg{
+    display:block;
+    width:100%;
+    height:auto;
+  }
+  #worldMapSvg .country{
+    fill:var(--panel);
+    stroke:var(--line);
+    stroke-width:0.5;
+  }
+  .map-route{
+    fill:none;
+    stroke:#5ad1e6;
+    stroke-width:1;
+    opacity:0.45;
+  }
+  .map-pin-dot{
+    fill:#5ad1e6;
+    stroke:#0f1526;
+    stroke-width:1.2;
+  }
+  .map-pin-count{
+    fill:#08111a;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    text-anchor:middle;
+    dominant-baseline:central;
+    pointer-events:none;
+  }
+  .map-status{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    color:var(--dim);
+    margin-top:1.2rem;
+  }
+  .map-credit{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.62rem;
+    letter-spacing:0.04em;
+    color:#3a3f52;
+    margin-top:0.6rem;
+  }
+
   /* ---------- FOOTER ---------- */
   footer{
     position:relative;
@@ -514,6 +573,19 @@
       <p>Starseed Transmission doesn't ask you to believe anything. It asks you to notice what you already feel, and gives it a vocabulary.</p>
     </div>
   </div>
+</section>
+
+<section id="worldmap">
+  <div class="section-head">
+    <div class="eyebrow">Live Signal Map</div>
+    <h2>Where starseeds are awakening</h2>
+    <p>Every dot is a city that has answered the check. Routes trace back to our home base in California.</p>
+  </div>
+  <div class="map-wrap">
+    <svg id="worldMapSvg" viewBox="0 0 960 500"></svg>
+  </div>
+  <div class="map-status" id="mapStatus">Loading signal map…</div>
+  <div class="map-credit">Map data © Natural Earth · Geocoding via OpenStreetMap Nominatim</div>
 </section>
 
 <!-- STEP 1 — REGISTRATION -->
@@ -912,6 +984,98 @@
     registerSection.hidden = false;
     regForm.reset();
     registerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ============================================================
+  // WORLD MAP — city registrations plotted with flight routes to California
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof d3 === 'undefined' || typeof topojson === 'undefined') return;
+
+    const mapStatus = document.getElementById('mapStatus');
+    const svg = d3.select('#worldMapSvg');
+    const WIDTH = 960, HEIGHT = 500;
+    // California reference point (Los Angeles) — every route fans out from here.
+    const BASE = { lat: 34.05, lng: -118.24 };
+
+    const projection = d3.geoNaturalEarth1().scale(155).translate([WIDTH / 2, HEIGHT / 1.7]);
+    const path = d3.geoPath(projection);
+
+    function project(lat, lng){
+      const p = projection([lng, lat]);
+      return p ? { x: p[0], y: p[1] } : null;
+    }
+
+    function arcPath(a, b){
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const curve = Math.min(dist * 0.25, 80);
+      // Perpendicular offset for a gentle flight-path arc.
+      const nx = -dy / (dist || 1);
+      const ny = dx / (dist || 1);
+      const cx = mx + nx * curve;
+      const cy = my + ny * curve;
+      return `M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}`;
+    }
+
+    Promise.all([
+      d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'),
+      fetch(SHEET_URL).then(r => r.json()).catch(() => [])
+    ]).then(([worldData, cities]) => {
+      const countries = topojson.feature(worldData, worldData.objects.countries);
+
+      svg.append('g')
+        .selectAll('path')
+        .data(countries.features)
+        .join('path')
+        .attr('class', 'country')
+        .attr('d', path);
+
+      const base = project(BASE.lat, BASE.lng);
+      const validCities = (Array.isArray(cities) ? cities : [])
+        .map(c => ({ ...c, pos: project(c.lat, c.lng) }))
+        .filter(c => c.pos && c.count > 0);
+
+      if(!validCities.length){
+        mapStatus.textContent = 'No signals recorded yet — be the first city on the map.';
+        return;
+      }
+
+      // Flight routes from California to every city.
+      if(base){
+        svg.append('g')
+          .selectAll('path')
+          .data(validCities)
+          .join('path')
+          .attr('class', 'map-route')
+          .attr('d', d => arcPath(base, d.pos));
+      }
+
+      // Balloon markers sized by registration count.
+      const markers = svg.append('g')
+        .selectAll('g')
+        .data(validCities)
+        .join('g')
+        .attr('transform', d => `translate(${d.pos.x},${d.pos.y})`);
+
+      markers.append('circle')
+        .attr('class', 'map-pin-dot')
+        .attr('r', d => Math.min(8 + Math.sqrt(d.count) * 4, 22));
+
+      markers.append('text')
+        .attr('class', 'map-pin-count')
+        .attr('font-size', d => Math.min(9 + Math.sqrt(d.count), 13))
+        .text(d => d.count);
+
+      markers.append('title').text(d => `${d.city}: ${d.count}`);
+
+      const totalSignals = validCities.reduce((sum, c) => sum + c.count, 0);
+      mapStatus.textContent = `${totalSignals} signal${totalSignals === 1 ? '' : 's'} received from ${validCities.length} cit${validCities.length === 1 ? 'y' : 'ies'}.`;
+    }).catch(() => {
+      mapStatus.textContent = 'Signal map is warming up — check back shortly.';
+    });
   });
 </script>
 
