@@ -518,14 +518,32 @@
     50%{ opacity:0.7; }
   }
   .map-pin-live{
+    transform-origin:50% 50%;
+    animation:pin-breathe 2.6s ease-in-out infinite;
+  }
+  .svg-pin-live{
     transform-box:fill-box;
     transform-origin:center;
     animation:pin-breathe 2.6s ease-in-out infinite;
   }
   @keyframes pin-breathe{
     0%, 100%{ transform:scale(1); }
-    50%{ transform:scale(1.15); }
+    50%{ transform:scale(1.1); }
   }
+  .starseed-pin{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#5ad1e6;
+    color:#08111a;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    border:1.5px solid #0a1120;
+    box-shadow:0 0 12px rgba(90,209,230,0.7);
+    white-space:nowrap;
+  }
+  .marker-cluster{ background:transparent !important; }
   .hero-cta-wrap{
     text-align:center;
     margin-top:2.4rem;
@@ -632,6 +650,9 @@
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 </head>
 <body>
 
@@ -1117,8 +1138,52 @@
       weight: 1.5,
       fillColor: '#e3b23c',
       fillOpacity: 0.9,
-      className: 'map-pin-live'
+      className: 'svg-pin-live'
     }).addTo(map).bindTooltip('Starseed Transmission HQ', { direction: 'top' });
+
+    // Brand-locked color per lineage, matching the quiz result reveal palette.
+    const RACE_COLORS = {
+      andromedan: '#5ad1e6',
+      arcturian: '#6f8fe0',
+      lyran: '#e3a13c',
+      pleiadian: '#e3b23c',
+      sirian: '#3ec6c6',
+      lemurian: '#c9a15a'
+    };
+    const DEFAULT_PIN_COLOR = '#5ad1e6';
+    function raceColor(race) {
+      return RACE_COLORS[(race || '').toLowerCase()] || DEFAULT_PIN_COLOR;
+    }
+
+    // Builds a round divIcon showing a count number, sized to the count, colored by lineage
+    // (used for both individual city pins and cluster bubbles, which sum their children's counts).
+    function countIcon(count, color, isCluster) {
+      const size = Math.min(22 + Math.sqrt(count) * 7, 62);
+      const fontSize = Math.min(11 + Math.sqrt(count) * 1.4, 20);
+      const bg = isCluster ? '#e3b23c' : color;
+      return L.divIcon({
+        html: `<div class="starseed-pin map-pin-live" style="width:${size}px;height:${size}px;font-size:${fontSize}px;background:${bg};box-shadow:0 0 12px ${bg}b3;">${count}</div>`,
+        className: '',
+        iconSize: [size, size]
+      });
+    }
+
+    let clusterGroup;
+    try {
+      clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 70,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        iconCreateFunction: (cluster) => {
+          const total = cluster.getAllChildMarkers().reduce((sum, m) => sum + (m._starseedCount || 1), 0);
+          return countIcon(total, null, true);
+        }
+      });
+    } catch (err) {
+      // Clustering plugin failed to load for some reason — fall back to plain (unclustered) pins
+      // rather than letting the whole map silently break.
+      clusterGroup = L.layerGroup();
+    }
 
     fetch(SHEET_URL).then(r => r.json()).then(cities => {
       const validCities = (Array.isArray(cities) ? cities : []).filter(c => c.lat && c.lng && c.count > 0);
@@ -1128,31 +1193,24 @@
         return;
       }
 
-      const bounds = [[BASE.lat, BASE.lng]];
-
       validCities.forEach(c => {
-        bounds.push([c.lat, c.lng]);
+        const color = raceColor(c.race);
 
         L.polyline([[BASE.lat, BASE.lng], [c.lat, c.lng]], {
-          color: '#5ad1e6',
+          color,
           weight: 1,
-          opacity: 0.5,
+          opacity: 0.55,
           className: 'map-route'
         }).addTo(map);
 
-        const radius = Math.min(5 + Math.sqrt(c.count) * 2.5, 20);
-
-        L.circleMarker([c.lat, c.lng], {
-          radius,
-          color: '#0a1120',
-          weight: 1,
-          fillColor: '#5ad1e6',
-          fillOpacity: 0.85,
-          className: 'map-pin-live'
-        })
-          .addTo(map)
-          .bindPopup(`<strong>${c.city}</strong><br>${c.count} signal${c.count === 1 ? '' : 's'}`);
+        const raceLabel = c.race ? c.race : 'Unspecified';
+        const marker = L.marker([c.lat, c.lng], { icon: countIcon(c.count, color, false) })
+          .bindPopup(`<strong>${c.city}</strong><br>${raceLabel} · ${c.count} signal${c.count === 1 ? '' : 's'}`);
+        marker._starseedCount = c.count;
+        clusterGroup.addLayer(marker);
       });
+
+      map.addLayer(clusterGroup);
 
       const totalSignals = validCities.reduce((sum, c) => sum + c.count, 0);
       mapStatus.textContent = `${totalSignals} signal${totalSignals === 1 ? '' : 's'} received from ${validCities.length} cit${validCities.length === 1 ? 'y' : 'ies'}.`;
