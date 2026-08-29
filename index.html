@@ -60,20 +60,34 @@
     position:fixed;
     top:0; left:0; right:0;
     z-index:20;
-    display:flex;
-    justify-content:space-between;
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
     align-items:center;
-    padding:1.6rem clamp(1.4rem, 5vw, 4rem);
-    mix-blend-mode:difference;
+    padding:1.3rem clamp(1.4rem, 5vw, 4rem);
+    background:linear-gradient(180deg, rgba(4,5,10,0.78), rgba(4,5,10,0.35) 70%, transparent);
+    backdrop-filter:blur(3px);
   }
   .brand{
+    grid-column:2;
+    justify-self:center;
+    text-align:center;
     font-family:'IBM Plex Mono', monospace;
-    font-size:0.78rem;
-    letter-spacing:0.22em;
+    font-size:clamp(1.05rem, 2.6vw, 1.55rem);
+    font-weight:500;
+    letter-spacing:0.2em;
     text-transform:uppercase;
+    color:var(--starlight);
   }
-  .brand span{ color:var(--signal); mix-blend-mode:normal; }
+  .brand span{
+    background:linear-gradient(90deg, var(--signal), #5ad1e6 140%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 7px rgba(227,178,60,0.4));
+  }
   .coords{
+    grid-column:3;
+    justify-self:end;
     font-family:'IBM Plex Mono', monospace;
     font-size:0.7rem;
     letter-spacing:0.05em;
@@ -547,6 +561,18 @@
   .hero-cta-wrap{
     text-align:center;
     margin-top:2.4rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0.9rem;
+  }
+  .cta-secondary{
+    border-color:#5ad1e6;
+    color:#5ad1e6;
+  }
+  .cta-secondary:hover{
+    background:#5ad1e6;
+    color:var(--void);
   }
   .map-goal-bar{
     position:absolute;
@@ -614,6 +640,94 @@
     0%, 100%{ filter:brightness(1); }
     50%{ filter:brightness(1.25); }
   }
+  .race-legend{
+    position:absolute;
+    left:1rem;
+    bottom:1rem;
+    z-index:1000;
+    background:rgba(8,11,20,0.82);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:0.8rem 1rem;
+    backdrop-filter:blur(3px);
+    min-width:150px;
+  }
+  .race-legend-title{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:0.6rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--dim);
+    margin-bottom:0.55rem;
+  }
+  .race-legend-row{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    padding:0.2rem 0;
+    font-family:'Work Sans', sans-serif;
+    font-size:0.78rem;
+    color:var(--starlight);
+  }
+  .race-legend-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:0 0 6px currentColor;
+  }
+  .race-legend-name{ flex:1; }
+  .race-legend-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    color:var(--starlight);
+  }
+  @media(max-width:640px){
+    .race-legend{
+      left:0.5rem;
+      bottom:0.5rem;
+      padding:0.6rem 0.8rem;
+      min-width:120px;
+    }
+    .race-legend-row{ font-size:0.7rem; }
+  }
+  .map-loading-overlay{
+    position:absolute;
+    inset:0;
+    z-index:2000;
+    background:#04050a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:opacity 0.5s ease;
+  }
+  .map-loading-overlay.hidden{
+    opacity:0;
+    pointer-events:none;
+  }
+  .map-loading-inner{
+    text-align:center;
+  }
+  .map-loading-ring{
+    width:52px;
+    height:52px;
+    margin:0 auto 1.4rem;
+    border:3px solid rgba(90,209,230,0.2);
+    border-top-color:#5ad1e6;
+    border-radius:50%;
+    animation:map-spin 0.9s linear infinite;
+  }
+  @keyframes map-spin{
+    to{ transform:rotate(360deg); }
+  }
+  .map-loading-text{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:clamp(1rem, 2.6vw, 1.4rem);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--signal);
+    text-shadow:0 0 16px rgba(227,178,60,0.4);
+  }
   .map-status{
     text-align:center;
     font-family:'IBM Plex Mono', monospace;
@@ -666,6 +780,15 @@
 <section id="worldmap">
   <div class="map-wrap">
     <div id="leafletMap"></div>
+    <div class="map-loading-overlay" id="mapLoadingOverlay">
+      <div class="map-loading-inner">
+        <div class="map-loading-ring"></div>
+        <div class="map-loading-text">Loading the signal map…</div>
+      </div>
+    </div>
+    <div class="race-legend" id="raceLegend">
+      <div class="race-legend-title">By Lineage</div>
+    </div>
     <div class="map-goal-bar">
       <div class="goal-caption">Goal</div>
       <div class="goal-label-top">10K</div>
@@ -677,6 +800,7 @@
     </div>
   </div>
   <div class="hero-cta-wrap">
+    <a href="https://starseedtransmission.gumroad.com" target="_blank" class="cta cta-secondary">Read Your Lineage <span class="arrow">→</span></a>
     <a href="#register" class="cta">Begin The Test and Connect To The World <span class="arrow">→</span></a>
   </div>
   <div class="map-status" id="mapStatus">Loading signal map…</div>
@@ -1126,11 +1250,21 @@
 
     // Standard OpenStreetMap tiles — genuinely free, no API key, no signup.
     // Darkened client-side via CSS filter (see .leaflet-tile-pane rule) to match the site's theme.
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       subdomains: 'abc',
       maxZoom: 19
     }).addTo(map);
+
+    let tilesReady = false, dataReady = false;
+    function maybeHideLoadingOverlay() {
+      if (!tilesReady || !dataReady) return;
+      const overlay = document.getElementById('mapLoadingOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+    tileLayer.on('load', () => { tilesReady = true; maybeHideLoadingOverlay(); });
+    // Safety net — never leave the overlay stuck if a tile/data event fails to fire.
+    setTimeout(() => { tilesReady = true; dataReady = true; maybeHideLoadingOverlay(); }, 7000);
 
     const baseMarker = L.circleMarker([BASE.lat, BASE.lng], {
       radius: 5,
@@ -1153,6 +1287,41 @@
     const DEFAULT_PIN_COLOR = '#5ad1e6';
     function raceColor(race) {
       return RACE_COLORS[(race || '').toLowerCase()] || DEFAULT_PIN_COLOR;
+    }
+
+    const RACE_DISPLAY = {
+      andromedan: { name: 'Andromedan', emoji: '🌀' },
+      arcturian: { name: 'Arcturian', emoji: '🔷' },
+      lyran: { name: 'Lyran', emoji: '🔥' },
+      pleiadian: { name: 'Pleiadian', emoji: '🌸' },
+      sirian: { name: 'Sirian', emoji: '🌊' },
+      lemurian: { name: 'Lemurian', emoji: '🌾' }
+    };
+    const RACE_ORDER = ['andromedan', 'arcturian', 'lyran', 'pleiadian', 'sirian', 'lemurian'];
+
+    function renderRaceLegend(cities) {
+      const legend = document.getElementById('raceLegend');
+      if (!legend) return;
+
+      const totals = {};
+      RACE_ORDER.forEach(k => totals[k] = 0);
+      cities.forEach(c => {
+        const key = (c.race || '').toLowerCase();
+        if (totals[key] !== undefined) totals[key] += c.count;
+      });
+
+      const rowsHtml = RACE_ORDER.map(key => {
+        const info = RACE_DISPLAY[key];
+        const color = RACE_COLORS[key];
+        const count = totals[key];
+        return `<div class="race-legend-row" style="color:${color}">
+          <span class="race-legend-dot" style="background:${color}"></span>
+          <span class="race-legend-name" style="color:var(--starlight)">${info.emoji} ${info.name}</span>
+          <span class="race-legend-count">${count}</span>
+        </div>`;
+      }).join('');
+
+      legend.innerHTML = `<div class="race-legend-title">By Lineage</div>${rowsHtml}`;
     }
 
     // Builds a round divIcon showing a count number, sized to the count, colored by lineage
@@ -1190,6 +1359,8 @@
 
       if (!validCities.length) {
         mapStatus.textContent = 'No signals recorded yet — be the first city on the map.';
+        dataReady = true;
+        maybeHideLoadingOverlay();
         return;
       }
 
@@ -1211,6 +1382,7 @@
       });
 
       map.addLayer(clusterGroup);
+      renderRaceLegend(validCities);
 
       const totalSignals = validCities.reduce((sum, c) => sum + c.count, 0);
       mapStatus.textContent = `${totalSignals} signal${totalSignals === 1 ? '' : 's'} received from ${validCities.length} cit${validCities.length === 1 ? 'y' : 'ies'}.`;
@@ -1223,8 +1395,12 @@
         goalFill.style.height = pct + '%';
         goalCurrent.textContent = totalSignals;
       }
+      dataReady = true;
+      maybeHideLoadingOverlay();
     }).catch(() => {
       mapStatus.textContent = 'Signal map is warming up — check back shortly.';
+      dataReady = true;
+      maybeHideLoadingOverlay();
     });
   });
 </script>
